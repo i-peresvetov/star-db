@@ -1,19 +1,15 @@
-import React, { Component } from 'react';
+import React, { Component } from "react"
+import SwapiService from "../../services/swapi-service"
+import Loading from "../loading"
 
-import SwapiService from '../../services/swapi-service'
-
-import './random-planet.css';
+import "./random-planet.css"
 
 export default class RandomPlanet extends Component {
-
   swapiService = new SwapiService()
 
   state = {
-    id: null,
-    name: null,
-    population: null,
-    rotationPeriod: null,
-    diameter: null
+    planet: {},
+    loading: true
   }
 
   constructor() {
@@ -21,29 +17,38 @@ export default class RandomPlanet extends Component {
     this.updatePlanet()
   }
 
+  onPlanetLoaded = (planet) => {
+    this.setState({
+      planet,
+      loading: true,
+    })
+  }
+
   updatePlanet() {
-    const id = Math.floor(Math.random()*25) + 2
+    const id = 12
     this.swapiService
       .getPlanet(id)
-      .then((planet)=>{
-        this.setState({
-          id,
-          name: planet.name,
-          population: planet.population,
-          rotationPeriod: planet.rotation_period,
-          diameter: planet.diameter
-        })
-      })
+      .then(this.onPlanetLoaded)
   }
 
   render() {
+    const { planet: {id, name, population, rotationPeriod, diameter }, loading } =
+      this.state
 
-    const { id, name, population, rotationPeriod, diameter } = this.state
+    if (loading) {
+      return (
+        <div className="jumbotron rounded">
+          <Loading />
+        </div>
+      )
+    }
 
     return (
       <div className="random-planet jumbotron rounded">
-        <img className="planet-image"
-             src={`https://starwars-visualguide.com/assets/img/planets/${id}.jpg`} />
+        <img
+          className="planet-image"
+          src={`https://starwars-visualguide.com/assets/img/planets/${id}.jpg`}
+        />
         <div>
           <h4>{name}</h4>
           <ul className="list-group list-group-flush">
@@ -62,7 +67,6 @@ export default class RandomPlanet extends Component {
           </ul>
         </div>
       </div>
-
-    );
+    )
   }
 }
